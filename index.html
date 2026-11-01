@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050d1c">
+<meta name="description" content="JARVIS personal AI assistant interface">
+<link rel="manifest" href="manifest.webmanifest">
+<title>J.A.R.V.I.S.</title>
+<style>
+:root{color-scheme:dark;--cyan:#55dfff;--blue:#168dff;--muted:#8ca9c5}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% 22%,#102c4b 0,#071426 42%,#030811 100%);color:#e8f7ff;font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid #1a5274;background:#06101dcc;position:sticky;top:0;z-index:2;backdrop-filter:blur(12px)}
+.brand{letter-spacing:.28em;font-size:14px;color:var(--cyan);font-weight:700}.status{font-size:11px;color:#8ee6ff;letter-spacing:.12em}
+main{max-width:760px;margin:auto;padding:22px 16px 110px}
+.visual{display:grid;place-items:center;padding:18px 0 20px}
+.core{width:min(54vw,210px);aspect-ratio:1;border-radius:50%;position:relative;display:grid;place-items:center;background:radial-gradient(circle,#123b5b 0 23%,#071b30 24% 39%,transparent 40%);box-shadow:0 0 35px #168dff55,inset 0 0 24px #55dfff22}
+.core:before,.core:after{content:"";position:absolute;inset:5%;border-radius:50%;border:2px solid transparent;border-top-color:var(--cyan);border-bottom-color:#168dff;animation:spin 9s linear infinite}
+.core:after{inset:15%;border:1px dashed #55dfff99;animation-direction:reverse;animation-duration:14s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.core span{font-size:36px;color:#b8f4ff;text-shadow:0 0 18px var(--cyan);letter-spacing:.08em}
+.sub{font-size:11px;letter-spacing:.24em;color:#85cde8;margin-top:18px}
+.panel{border:1px solid #1b5273;background:#07172acc;border-radius:18px;padding:16px;box-shadow:0 10px 35px #0005}
+.panel h2{font-size:12px;letter-spacing:.2em;color:var(--cyan);font-weight:600;margin:0 0 12px}
+#chat{height:34vh;min-height:220px;max-height:390px;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:4px 2px 12px}
+.msg{max-width:88%;padding:12px 14px;border-radius:14px;line-height:1.45;font-size:14px;white-space:pre-wrap}
+.jarvis{align-self:flex-start;background:#0b2940;border:1px solid #1a6388}
+.user{align-self:flex-end;background:#123b5c;border:1px solid #267cb0}
+.tag{font-size:9px;letter-spacing:.16em;color:#79cce9;margin-bottom:5px}
+.composer{display:flex;gap:8px;margin-top:12px}
+input{min-width:0;flex:1;background:#030d19;border:1px solid #286184;border-radius:12px;padding:14px;color:white;font-size:15px;outline:none}
+button{border:1px solid #43c9f2;background:linear-gradient(145deg,#125b88,#092d4a);color:#e8faff;border-radius:12px;padding:0 16px;font-weight:700}
+button:active{transform:scale(.97)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.controls button{padding:10px 12px;font-size:12px}
+.note{color:#9ab5ca;font-size:11px;line-height:1.5;margin:14px 2px 0}
+footer{text-align:center;color:#587d98;font-size:10px;letter-spacing:.12em;padding:22px}
+</style>
+</head>
+<body>
+<header><div class="brand">J.A.R.V.I.S.</div><div class="status">● SYSTEM ONLINE · LOCAL MODE</div></header>
+<main>
+  <section class="visual">
+    <div class="core"><span>J</span></div>
+    <div class="sub">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+  </section>
+  <section class="panel">
+    <h2>COMMUNICATION INTERFACE</h2>
+    <div id="chat" aria-live="polite">
+      <div class="msg jarvis"><div class="tag">J.A.R.V.I.S.</div>Good evening. Interface initialised. My online AI connection has not been configured yet.</div>
+    </div>
+    <form class="composer" id="form">
+      <input id="prompt" autocomplete="off" placeholder="Message JARVIS…" aria-label="Message JARVIS">
+      <button type="submit">SEND</button>
+    </form>
+    <div class="controls">
+      <button id="voice">SPEECH: ON</button>
+      <button id="clear">CLEAR CHAT</button>
+    </div>
+    <p class="note">Prototype: chat history is saved on this device and replies can be spoken aloud. The online AI brain is not connected yet, so this version does not generate real AI answers.</p>
+  </section>
+</main>
+<footer>STARK-STYLE PERSONAL ASSISTANT · PROTOTYPE 01</footer>
+<script>
+const chat=document.querySelector('#chat'), form=document.querySelector('#form'), input=document.querySelector('#prompt');
+let speechOn=true;
+const saved=localStorage.getItem('jarvis-chat-v1');
+if(saved){try{chat.innerHTML=saved}catch(e){}}
+function add(text,who){const box=document.createElement('div');box.className='msg '+who;const tag=document.createElement('div');tag.className='tag';tag.textContent=who==='user'?'YOU':'J.A.R.V.I.S.';const body=document.createElement('div');body.textContent=text;box.append(tag,body);chat.append(box);chat.scrollTop=chat.scrollHeight;localStorage.setItem('jarvis-chat-v1',chat.innerHTML);if(who==='jarvis'&&speechOn&&'speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-GB';u.rate=.94;u.pitch=.88;const voices=speechSynthesis.getVoices();const british=voices.find(v=>v.lang==='en-GB'&&/male|daniel|george/i.test(v.name))||voices.find(v=>v.lang==='en-GB');if(british)u.voice=british;speechSynthesis.speak(u)}}
+form.addEventListener('submit',e=>{e.preventDefault();const t=input.value.trim();if(!t)return;add(t,'user');input.value='';add('I have received your message. My online AI brain still needs to be connected before I can answer intelligently.','jarvis')});
+document.querySelector('#voice').onclick=()=>{speechOn=!speechOn;document.querySelector('#voice').textContent='SPEECH: '+(speechOn?'ON':'OFF');if(!speechOn&&'speechSynthesis'in window)speechSynthesis.cancel()};
+document.querySelector('#clear').onclick=()=>{chat.innerHTML='';localStorage.removeItem('jarvis-chat-v1');if('speechSynthesis'in window)speechSynthesis.cancel()};
+if('serviceWorker'in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>
